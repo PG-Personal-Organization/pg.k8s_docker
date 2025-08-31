@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: context-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: context-auth
+  template:
+    metadata:
+      labels:
+        app: context-auth
+    spec:
+      initContainers:
+        - name: context-auth-init-sql
+          image: postgres:16
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for DB..."; \
+              until pg_isready -h postgres-postgresql -U pg; do sleep 2; done; \
+              psql -h postgres-postgresql -U pg -d mydb -f /init/context-auth-init.sql
+          env:
+            - name: PGPASSWORD
+              value: pgpass
+          volumeMounts:
+            - name: init-sql
+              mountPath: /init
+      containers:
+        - name: context-auth
+          image: myregistry.com/context-auth:1.0.0
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: context-auth-config
+      volumes:
+        - name: init-sql
+          configMap:
+            name: context-auth-init-sql

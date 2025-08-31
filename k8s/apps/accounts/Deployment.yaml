@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts
+  template:
+    metadata:
+      labels:
+        app: accounts
+    spec:
+      initContainers:
+        - name: accounts-init-sql
+          image: postgres:16
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for DB..."; \
+              until pg_isready -h postgres-postgresql -U pg; do sleep 2; done; \
+              psql -h postgres-postgresql -U pg -d mydb -f /init/accounts-init.sql
+          env:
+            - name: PGPASSWORD
+              value: pgpass
+          volumeMounts:
+            - name: init-sql
+              mountPath: /init
+      containers:
+        - name: accounts
+          image: localhost:5000/pg.accounts.standalone:1.0.0
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: accounts-config
+      volumes:
+        - name: init-sql
+          configMap:
+            name: accounts-init-sql

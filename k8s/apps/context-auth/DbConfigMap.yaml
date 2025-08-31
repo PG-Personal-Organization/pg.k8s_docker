@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: context-auth-init-sql
+data:
+  context-auth-init.sql: |
+    INSERT INTO roles(name) VALUES ('ADMIN'), ('USER');
+    INSERT INTO users(username, password) VALUES ('demo', 'secret');

@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-init
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-bucket
+          image: minio/mc
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              /usr/bin/mc alias set myminio http://minio:9000 minio minio123 &&
+              /usr/bin/mc mb myminio/payments-imports &&
+              /usr/bin/mc anonymous set public myminio/payments-imports || true
+      restartPolicy: OnFailure

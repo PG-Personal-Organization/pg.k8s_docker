@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  # --- Server ---
+  SERVER_PORT: "8080"
+
+  # --- Remote microservices ---
+  CONTEXT_AUTH_HOST: "http://context-auth:80"
+  PAYMENTS_HOST: "http://payments:80"

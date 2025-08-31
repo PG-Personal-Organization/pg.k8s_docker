@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: accounts-init-sql
+data:
+  accounts-init.sql: |
+    INSERT INTO roles(name) VALUES ('ADMIN'), ('USER');
+    INSERT INTO users(username, password) VALUES ('demo', 'secret');

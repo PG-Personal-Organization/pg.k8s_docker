@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: payments
+  template:
+    metadata:
+      labels:
+        app: payments
+    spec:
+      initContainers:
+        - name: payments-init-sql
+          image: postgres:16
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for DB..."; \
+              until pg_isready -h postgres-postgresql -U pg; do sleep 2; done; \
+              psql -h postgres-postgresql -U pg -d mydb -f /init/payments-init.sql
+          env:
+            - name: PGPASSWORD
+              value: pgpass
+          volumeMounts:
+            - name: init-sql
+              mountPath: /init
+      containers:
+        - name: payments
+          image: myregistry.com/payments:1.0.0
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: payments-config
+      volumes:
+        - name: init-sql
+          configMap:
+            name: payments-init-sql
