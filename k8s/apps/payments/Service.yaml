@@ -12,5 +12,6 @@ spec:
   selector:
     app: payments
   ports:
-    - port: 80
+    - name: http
+      port: 8083
       targetPort: 8083

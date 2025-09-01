@@ -35,3 +35,8 @@ data:
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['api-gateway:8080']
+    
+      # Kafka Exporter
+      - job_name: 'kafka-exporter'
+        static_configs:
+          - targets: ['kafka-exporter:9308']
