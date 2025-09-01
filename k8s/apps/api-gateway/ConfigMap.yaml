@@ -12,3 +12,13 @@ data:
   # --- Remote microservices ---
   CONTEXT_AUTH_HOST: "http://context-auth:8081"
   PAYMENTS_HOST: "http://payments:8083"
+
+  # --- Logging ---
+  LOGGING_LEVEL_PG: "debug"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "debug"
+
+  # --- Gateway body size / multipart config ---
+  SPRING_CODEC_MAX_IN_MEMORY_SIZE: "52428800"
+  SPRING_CLOUD_GATEWAY_HTTPCLIENT_MAX_IN_MEMORY_SIZE: "52428800"
+  SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: "50MB"
+  SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: "50MB"

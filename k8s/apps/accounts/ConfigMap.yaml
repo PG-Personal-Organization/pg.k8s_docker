@@ -22,6 +22,10 @@ data:
   # --- Hibernate ---
   SHOW_SQL: "false"
 
+  # --- Logging ---
+  LOGGING_LEVEL_PG: "debug"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "debug"
+
   # --- Remote modules (other microservices) ---
   CONTEXT_AUTH_HOST: "http://context-auth:8081"
   PAYMENTS_HOST: "http://payments:8083"

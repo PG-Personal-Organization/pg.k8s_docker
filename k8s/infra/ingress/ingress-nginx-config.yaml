@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+data:
+  proxy-body-size: "50m"
+  proxy-read-timeout: "600"
+  proxy-send-timeout: "600"

@@ -5,6 +5,17 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+        - name: wait-for-minio
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "⏳ Waiting for MinIO at minio:9000..."
+              until nc -z minio 9000; do
+                sleep 2
+              done
+              echo "✅ MinIO is up!"
       containers:
         - name: create-bucket
           image: minio/mc
@@ -12,6 +23,6 @@ spec:
           args:
             - >
               /usr/bin/mc alias set myminio http://minio:9000 minio minio123 &&
-              /usr/bin/mc mb myminio/payments-imports &&
-              /usr/bin/mc anonymous set public myminio/payments-imports || true
+              /usr/bin/mc mb -p myminio/payments-imported-files &&
+              /usr/bin/mc anonymous set public myminio/payments-imported-files || true
       restartPolicy: OnFailure

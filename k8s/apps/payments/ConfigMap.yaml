@@ -22,6 +22,10 @@ data:
   # --- Hibernate ---
   SHOW_SQL: "false"
 
+  # --- Logging ---
+  LOGGING_LEVEL_PG: "debug"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "debug"
+
   # --- MongoDB ---
   MONGODB_HOST: "mongo"
   MONGODB_PORT: "27017"
@@ -35,7 +39,7 @@ data:
   KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
 
   # --- AWS S3 / MinIO ---
-  AWS_BUCKET_NAME: "payments-imported-files"
-  AWS_ACCESS_KEY: "admin"
-  AWS_SECRET_KEY: "admin123"
-  AWS_URL: "http://minio:9000"
+  PG_LIB_AWSFILES_BUCKET_NAME: "payments-imported-files"
+  PG_LIB_AWSFILES_ACCESS_KEY: "minio"
+  PG_LIB_AWSFILES_SECRET_KEY: "minio123"
+  PG_LIB_AWSFILES_AWS_URL: "http://minio:9000"

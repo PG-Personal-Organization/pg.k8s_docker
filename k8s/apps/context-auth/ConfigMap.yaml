@@ -18,3 +18,7 @@ data:
 
   # --- Hibernate ---
   SHOW_SQL: "false"
+
+  # --- Logging ---
+  LOGGING_LEVEL_PG: "debug"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "debug"
