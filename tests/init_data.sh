@@ -1,6 +1,3 @@
-echo "⏳ Sleeping 2s to let schemas initialize..."
-sleep 2
-
 echo "📦 Seeding initial data into Postgres..."
 
 kubectl exec -i deploy/postgres -- \

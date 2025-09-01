@@ -44,4 +44,12 @@ echo "   - MinIO:          http://minio.local"
 echo "   - Prometheus:     http://prometheus.local"
 echo "   - Grafana:        http://grafana.local"
 
+echo "⏳ Sleeping 2s to let schemas initialize..."
+sleep 2
+
 sh tests/init_data.sh
+
+#echo "⏳ Sleeping 10s to start testing runs..."
+#sleep 10
+#
+#sh tests/login_and_import_files.sh

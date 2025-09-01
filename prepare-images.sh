@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# accounts
-cd pg.accounts || exit
+# api-gateway
+cd pg.api-gateway || exit
 sh build.sh
 cd ..
 
-# api-gateway
-cd pg.api-gateway || exit
+# accounts
+cd pg.accounts || exit
 sh build.sh
 cd ..
 
