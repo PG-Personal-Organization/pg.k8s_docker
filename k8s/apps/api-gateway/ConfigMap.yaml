@@ -10,5 +10,5 @@ data:
   MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
 
   # --- Remote microservices ---
-  CONTEXT_AUTH_HOST: "http://context-auth:80"
-  PAYMENTS_HOST: "http://payments:80"
+  CONTEXT_AUTH_HOST: "http://context-auth:8081"
+  PAYMENTS_HOST: "http://payments:8083"

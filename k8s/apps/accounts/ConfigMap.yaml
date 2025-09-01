@@ -23,5 +23,5 @@ data:
   SHOW_SQL: "false"
 
   # --- Remote modules (other microservices) ---
-  CONTEXT_AUTH_HOST: "http://context-auth:80"
-  PAYMENTS_HOST: "http://payments:80"
+  CONTEXT_AUTH_HOST: "http://context-auth:8081"
+  PAYMENTS_HOST: "http://payments:8083"

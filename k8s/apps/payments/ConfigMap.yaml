@@ -28,8 +28,8 @@ data:
   MONGODB_DATABASE: "payments"
 
   # --- Remote modules (other microservices) ---
-  CONTEXT_AUTH_HOST: "http://context-auth:80"
-  ACCOUNTS_HOST: "http://accounts:80"
+  CONTEXT_AUTH_HOST: "http://context-auth:8081"
+  ACCOUNTS_HOST: "http://accounts:8082"
 
   # --- Kafka ---
   KAFKA_BOOTSTRAP_SERVER: "kafka:9092"

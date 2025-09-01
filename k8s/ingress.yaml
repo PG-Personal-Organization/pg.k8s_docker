@@ -16,7 +16,7 @@ spec:
               service:
                 name: api-gateway
                 port:
-                  number: 80
+                  number: 8080
     - host: auth.local
       http:
         paths:
@@ -26,7 +26,7 @@ spec:
               service:
                 name: context-auth
                 port:
-                  number: 80
+                  number: 8081
     - host: accounts.local
       http:
         paths:
@@ -36,7 +36,7 @@ spec:
               service:
                 name: accounts
                 port:
-                  number: 80
+                  number: 8082
     - host: payments.local
       http:
         paths:
@@ -46,7 +46,7 @@ spec:
               service:
                 name: payments
                 port:
-                  number: 80
+                  number: 8083
     - host: akhq.local
       http:
         paths:
