@@ -8,11 +8,19 @@ data:
   prometheus-datasource.yaml: |
     apiVersion: 1
     datasources:
-      - name: ${DS_PROMETHEUS}
+      - name: prometheus
         type: prometheus
         access: proxy
         url: http://prometheus:9090
         isDefault: true
         uid: prometheus_ds
         orgId: 1
+        editable: true
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: false
+        uid: prometheus_ds_2
+        orgId: 1   # 👈 keep in the same org unless you’re running multi-org
         editable: true
