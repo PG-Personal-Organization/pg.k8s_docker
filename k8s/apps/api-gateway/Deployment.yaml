@@ -14,9 +14,23 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: myregistry.com/api-gateway:1.0.0
+          image: localhost:5000/pg.api-gateway:1.0.0
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: api-gateway-config
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20

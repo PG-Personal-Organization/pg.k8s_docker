@@ -19,8 +19,8 @@ spec:
           args:
             - |
               echo "Waiting for DB..."; \
-              until pg_isready -h postgres-postgresql -U pg; do sleep 2; done; \
-              psql -h postgres-postgresql -U pg -d mydb -f /init/accounts-init.sql
+              until pg_isready -h postgres -U pg; do sleep 2; done; \
+              psql -h postgres -U pg -d pgdb -f /init/accounts-init.sql
           env:
             - name: PGPASSWORD
               value: pgpass
@@ -35,6 +35,20 @@ spec:
           envFrom:
             - configMapRef:
                 name: accounts-config
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 20
       volumes:
         - name: init-sql
           configMap:

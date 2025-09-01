@@ -12,30 +12,33 @@ spec:
       labels:
         app: payments
     spec:
-      initContainers:
-        - name: payments-init-sql
-          image: postgres:16
-          command: ["sh", "-c"]
-          args:
-            - |
-              echo "Waiting for DB..."; \
-              until pg_isready -h postgres-postgresql -U pg; do sleep 2; done; \
-              psql -h postgres-postgresql -U pg -d mydb -f /init/payments-init.sql
-          env:
-            - name: PGPASSWORD
-              value: pgpass
-          volumeMounts:
-            - name: init-sql
-              mountPath: /init
       containers:
         - name: payments
-          image: myregistry.com/payments:1.0.0
+          image: localhost:5000/pg.payments.standalone:1.0.0
           ports:
             - containerPort: 8083
           envFrom:
             - configMapRef:
                 name: payments-config
+
+          volumeMounts:
+            - name: payments-topics-config
+              mountPath: /app/config
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 15
+            periodSeconds: 20
       volumes:
-        - name: init-sql
+        - name: payments-topics-config
           configMap:
-            name: payments-init-sql
+            name: payments-topics-config

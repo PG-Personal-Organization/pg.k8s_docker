@@ -2,6 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: accounts
+  labels:
+    app: accounts
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8082"
 spec:
   selector:
     app: accounts

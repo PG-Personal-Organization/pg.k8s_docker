@@ -5,6 +5,8 @@ metadata:
 data:
   # --- Server ---
   SERVER_PORT: "8080"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
 
   # --- Remote microservices ---
   CONTEXT_AUTH_HOST: "http://context-auth:80"

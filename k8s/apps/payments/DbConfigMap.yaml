@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: payments-init-sql
-data:
-  payments-init.sql: |
-    INSERT INTO roles(name) VALUES ('ADMIN'), ('USER');
-    INSERT INTO users(username, password) VALUES ('demo', 'secret');
