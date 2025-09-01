@@ -2,27 +2,36 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-
 data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
+
     scrape_configs:
-      - job_name: 'kubernetes-nodes'
-        kubernetes_sd_configs:
-          - role: node
-      - job_name: 'kubernetes-pods'
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-            action: keep
-            regex: "true"
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
-            action: replace
-            target_label: __address__
-            regex: (.+)
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Accounts microservice
+      - job_name: 'accounts'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['accounts:8082']
+
+      # Payments microservice
+      - job_name: 'payments'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['payments:8083']
+
+      # Context-auth microservice
+      - job_name: 'context-auth'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['context-auth:8081']
+
+      # API Gateway
+      - job_name: 'api-gateway'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['api-gateway:8080']

@@ -43,3 +43,5 @@ echo "   - AKHQ:           http://akhq.local"
 echo "   - MinIO:          http://minio.local"
 echo "   - Prometheus:     http://prometheus.local"
 echo "   - Grafana:        http://grafana.local"
+
+sh tests/init_data.sh
