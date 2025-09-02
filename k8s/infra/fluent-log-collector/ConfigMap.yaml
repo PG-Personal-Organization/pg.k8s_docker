@@ -13,15 +13,16 @@ data:
         Parsers_File /fluent-bit/etc/parsers-extra.conf
 
     [INPUT]
-        Name                 tail
-        Path                 /var/log/containers/*.log
-        Parser               cri
-        Tag                  kube.*
-        Read_From_Head       On
-        Refresh_Interval     5
-        Skip_Long_Lines      On
-        Skip_Empty_Lines     On
-        DB                   /fluent-bit/state/tail.db
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            cri
+        Tag               kube.*
+        DB                /fluent-bit/state/flb_pods.db
+        DB.Sync           Normal
+        Skip_Long_Lines   On
+        Skip_Empty_Lines  On
+        Refresh_Interval  5
+        Read_From_Head    Off
 
     [FILTER]
         Name                 kubernetes
