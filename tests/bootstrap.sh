@@ -43,6 +43,8 @@ echo "   - AKHQ:           http://akhq.local"
 echo "   - MinIO:          http://minio.local"
 echo "   - Prometheus:     http://prometheus.local"
 echo "   - Grafana:        http://grafana.local"
+echo "   - Elastic:        http://elastic.local"
+echo "   - Kibana:         http://kibana.local"
 
 echo "⏳ Sleeping 2s to let schemas initialize..."
 sleep 2

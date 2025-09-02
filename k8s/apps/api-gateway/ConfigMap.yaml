@@ -14,8 +14,11 @@ data:
   PAYMENTS_HOST: "http://payments:8083"
 
   # --- Logging ---
-  LOGGING_LEVEL_PG: "debug"
-  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "debug"
+  LOGGING_LEVEL_PG: "info"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "info"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "info"
+  LOGGING_FILE_NAME: ""
+  LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{app-trace-id}] %-5level %logger{36} - %msg%n"
 
   # --- Gateway body size / multipart config ---
   SPRING_CODEC_MAX_IN_MEMORY_SIZE: "52428800"

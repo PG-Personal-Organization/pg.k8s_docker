@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: kube-system
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        5
+        Daemon       Off
+        Log_Level    info
+        Parsers_File /fluent-bit/etc/parsers.conf
+        Parsers_File /fluent-bit/etc/parsers-extra.conf
+
+    [INPUT]
+        Name                 tail
+        Path                 /var/log/containers/*.log
+        Parser               cri
+        Tag                  kube.*
+        Read_From_Head       On
+        Refresh_Interval     5
+        Skip_Long_Lines      On
+        Skip_Empty_Lines     On
+        DB                   /fluent-bit/state/tail.db
+
+    [FILTER]
+        Name                 kubernetes
+        Match                kube.*
+        Kube_URL             https://kubernetes.default.svc:443
+        Kube_CA_File         /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File      /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix      kube.var.log.containers.
+        Merge_Log            On
+        Keep_Log             Off
+        Labels               On
+        Annotations          Off
+
+    [FILTER]
+        Name                 parser
+        Match                kube.*
+        Key_Name             log
+        Parser               spring
+        Reserve_Data         On
+
+    [OUTPUT]
+        Name                 es
+        Match                *
+        Host                 elasticsearch.default.svc.cluster.local
+        Port                 9200
+        Index                k8s-logs
+        Suppress_Type_Name   On
+        Logstash_Format      Off
+        Replace_Dots         On
+        Time_Key             @timestamp
+
+  parsers-extra.conf: |
+    # Spring console pattern with milliseconds:
+    # 2025-09-02 18:34:55.123 [trace-id] LEVEL logger - message
+    [PARSER]
+        Name        spring
+        Format      regex
+        Regex       ^(?<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) \[(?<traceId>[A-Za-z0-9\-]*)\] (?<level>[A-Z]+)\s+(?<logger>[^ ]+) - (?<message>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%d %H:%M:%S.%L

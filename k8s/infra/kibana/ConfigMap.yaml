@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-dataview
+data:
+  create-index-pattern.sh: |
+    #!/bin/sh
+    set -e
+
+    KIBANA=http://kibana:5601
+
+    echo "⏳ Waiting for Kibana to become available..."
+    until curl -sf "$KIBANA/api/status" | grep -q '"overall":{"level":"available"'; do
+      echo "Kibana not ready yet, sleeping 5s..."
+      sleep 5
+    done
+    echo "✅ Kibana is available."
+
+    has_jq() { command -v jq >/dev/null 2>&1; }
+
+    extract_id() {
+      if has_jq; then
+        jq -r "$1"
+      else
+        # crude but good enough for these responses
+        grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4
+      fi
+    }
+
+    echo "🔎 Looking for existing data view..."
+    FIND_RESP=$(curl -sf -H 'kbn-xsrf: true' \
+      "$KIBANA/api/saved_objects/_find?type=index-pattern&per_page=1&search_fields=title&search=k8s-logs*")
+
+    DID=$(printf "%s" "$FIND_RESP" | extract_id '.saved_objects[0].id // empty')
+
+    if [ -z "$DID" ]; then
+      echo "➕ Creating data view k8s-logs* ..."
+      CREATE_RESP=$(curl -sf -X POST "$KIBANA/api/data_views/data_view" \
+        -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+        -d '{
+              "data_view": {
+                "title": "k8s-logs*",
+                "name": "K8s Logs",
+                "timeFieldName": "@timestamp"
+              }
+            }')
+      DID=$(printf "%s" "$CREATE_RESP" | extract_id '.data_view.id')
+      echo "Created data view id: $DID"
+    else
+      echo "Found existing data view id: $DID"
+    fi
+
+    echo "⚙️  Setting default index and Discover columns..."
+    curl -sf -X POST "$KIBANA/api/kibana/settings" \
+      -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+      -d "{
+        \"changes\": {
+          \"defaultIndex\": \"$DID\",
+          \"discover:columns\": [\"kubernetes.pod_name\",\"traceId\",\"message\",\"logger\",\"level\"]
+        }
+      }" | sed -e 's/.*/Kibana settings updated./'
