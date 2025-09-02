@@ -49,7 +49,7 @@ sleep 2
 
 sh tests/init_data.sh
 
-#echo "⏳ Sleeping 10s to start testing runs..."
-#sleep 10
+#echo "⏳ Sleeping 60s to start testing runs..."
+#sleep 60
 #
 #sh tests/login_and_import_files.sh
