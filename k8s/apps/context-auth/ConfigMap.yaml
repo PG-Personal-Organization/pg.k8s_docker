@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: context-auth-config
 data:
+  SPRING_APPLICATION_NAME: "context-auth-microservice"
+
   # --- Server ports ---
   SERVER_PORT: "8081"
   MANAGEMENT_SERVER_PORT: "8081"
