@@ -1,7 +1,0 @@
-version: "3.9"
-
-include:
-  - ./postgres.yml
-  - ./mongo.yml
-  - ./kafka.yml
-
