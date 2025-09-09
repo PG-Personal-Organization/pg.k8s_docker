@@ -3612,7 +3612,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-3h",
+        "from": "now-5m",
         "to": "now"
       },
       "timepicker": {
@@ -3645,4 +3645,171 @@ data:
       "uid": "jwPKIsniz",
       "version": 39,
       "weekStart": ""
+    }
+  app-metrics.json: |
+    {
+      "id": null,
+      "uid": "apps-metrics",
+      "title": "Applications Metrics",
+      "tags": ["spring", "micrometer", "apps"],
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "version": 1,
+      "refresh": "30s",
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Process CPU Usage",
+          "targets": [
+            {
+              "expr": "process_cpu_usage{application!=\"\"}",
+              "legendFormat": "{{application}}",
+              "interval": ""
+            }
+          ],
+          "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+        },
+        {
+          "type": "timeseries",
+          "title": "JVM Heap Memory Usage (MiB) MAX",
+          "targets": [
+            {
+              "expr": "jvm_memory_max_bytes{area=\"heap\", application!=\"\"} / 1024 / 1024",
+              "legendFormat": "max - {{application}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0,
+              "custom": {
+                "axisLabel": "MiB",
+                "axisPlacement": "auto"
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+        },
+        {
+          "type": "timeseries",
+          "title": "JVM Heap Memory Usage (MiB) Current",
+          "targets": [
+            {
+              "expr": "jvm_memory_used_bytes{area=\"heap\", application!=\"\"} / 1024 / 1024",
+              "legendFormat": "used - {{application}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0,
+              "custom": {
+                "axisLabel": "MiB",
+                "axisPlacement": "auto"
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+        },
+        {
+          "type": "timeseries",
+          "title": "HTTP Requests Rate",
+          "targets": [
+            {
+              "expr": "rate(http_server_requests_seconds_count{application!=\"\"}[1m])",
+              "legendFormat": "{{application}} {{uri}}"
+            }
+          ],
+          "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}
+        }
+      ]
+    }
+    
+
+  imports-metrics.json: |
+    {
+      "id": null,
+      "title": "Imports Dashboard",
+      "tags": ["db", "imports", "apps"],
+      "uid": "imports-dashboard",
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "30s",
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Parsing Duration (ms)",
+          "datasource": {
+            "type": "postgres",
+            "uid": "Postgres"
+          },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "A",
+              "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS parsing_time_ms, i.\"started_parsing_on\" AS time FROM imports i WHERE i.\"started_parsing_on\" IS NOT NULL AND i.\"ended_parsing_on\" IS NOT NULL ORDER BY time;"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "showPoints": "auto"
+              }
+            }
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          }
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Importing Duration (ms)",
+          "datasource": {
+            "type": "postgres",
+            "uid": "Postgres"
+          },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "B",
+              "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS importing_time_ms, i.\"started_importing_on\" AS time FROM imports i WHERE i.\"started_importing_on\" IS NOT NULL AND i.\"finished_importing_on\" IS NOT NULL ORDER BY time;"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "showPoints": "auto"
+              }
+            }
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          }
+        }
+      ]
     }

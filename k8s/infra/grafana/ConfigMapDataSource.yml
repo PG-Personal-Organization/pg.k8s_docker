@@ -24,3 +24,13 @@ data:
         uid: prometheus_ds_2
         orgId: 1   # 👈 keep in the same org unless you’re running multi-org
         editable: true
+      - name: Postgres
+        type: postgres
+        access: proxy
+        url: postgres:5432
+        user: pg
+        database: pgdb
+        secureJsonData:
+          password: pgpass
+        jsonData:
+          sslmode: disable
