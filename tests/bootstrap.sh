@@ -50,8 +50,3 @@ echo "⏳ Sleeping 2s to let schemas initialize..."
 sleep 2
 
 sh tests/init_data.sh
-
-#echo "⏳ Sleeping 60s to start testing runs..."
-#sleep 60
-#
-#sh tests/login_and_import_files.sh
