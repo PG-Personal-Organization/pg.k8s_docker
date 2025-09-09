@@ -1,4 +1,4 @@
-kubectl logs accounts-66699f48bc-59wvc
+kubectl logs context-auth-85cfb64cb4-cd7kl
 
 kubectl exec -n kube-system -it fluent-bit-54mp4 -- ls /var/lib/docker/containers | head
 

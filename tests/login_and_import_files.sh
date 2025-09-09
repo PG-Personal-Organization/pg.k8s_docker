@@ -26,7 +26,9 @@ echo "$headers"
 
 auth_header=$(echo "$headers" | grep -i "^app-context-token:" | cut -d' ' -f2-)
 
-IMPORT_DIR="single_import_1000"
+IMPORT_DIR="test_series_2_1500"
+#IMPORT_DIR="test_series_3_8000"
+#IMPORT_DIR="test_series_5_18500"
 PLUGIN_CODE="ACCOUNT_TRANSFERS"
 
 for file in "$IMPORT_DIR"/*.csv; do
