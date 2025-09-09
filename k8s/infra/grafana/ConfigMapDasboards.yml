@@ -3751,10 +3751,7 @@ data:
           "id": 1,
           "type": "timeseries",
           "title": "Parsing Duration (ms)",
-          "datasource": {
-            "type": "postgres",
-            "uid": "Postgres"
-          },
+          "datasource": { "type": "postgres", "uid": "Postgres" },
           "targets": [
             {
               "format": "time_series",
@@ -3762,31 +3759,14 @@ data:
               "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS parsing_time_ms, i.\"started_parsing_on\" AS time FROM imports i WHERE i.\"started_parsing_on\" IS NOT NULL AND i.\"ended_parsing_on\" IS NOT NULL ORDER BY time;"
             }
           ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "ms",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "showPoints": "auto"
-              }
-            }
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 0,
-            "w": 12,
-            "h": 8
-          }
+          "fieldConfig": { "defaults": { "unit": "ms" } },
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
         },
         {
           "id": 2,
           "type": "timeseries",
           "title": "Importing Duration (ms)",
-          "datasource": {
-            "type": "postgres",
-            "uid": "Postgres"
-          },
+          "datasource": { "type": "postgres", "uid": "Postgres" },
           "targets": [
             {
               "format": "time_series",
@@ -3794,22 +3774,39 @@ data:
               "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS importing_time_ms, i.\"started_importing_on\" AS time FROM imports i WHERE i.\"started_importing_on\" IS NOT NULL AND i.\"finished_importing_on\" IS NOT NULL ORDER BY time;"
             }
           ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "ms",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "showPoints": "auto"
-              }
+          "fieldConfig": { "defaults": { "unit": "ms" } },
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Parsed Records Count",
+          "datasource": { "type": "postgres", "uid": "Postgres" },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "C",
+              "rawSql": "SELECT i.plugin_code AS plugin, SUM(r.count) AS parsed_records, i.\"ended_parsing_on\" AS time FROM imports i JOIN imported_records r ON r.parent_import_id = i.id WHERE i.\"ended_parsing_on\" IS NOT NULL GROUP BY i.plugin_code, i.\"ended_parsing_on\" ORDER BY time;"
             }
-          },
-          "gridPos": {
-            "x": 12,
-            "y": 0,
-            "w": 12,
-            "h": 8
-          }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Imported Records Count",
+          "datasource": { "type": "postgres", "uid": "Postgres" },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "D",
+              "rawSql": "SELECT i.plugin_code AS plugin, SUM(r.count) AS imported_records, i.\"finished_importing_on\" AS time FROM imports i JOIN imported_records r ON r.parent_import_id = i.id WHERE i.\"finished_importing_on\" IS NOT NULL GROUP BY i.plugin_code, i.\"finished_importing_on\" ORDER BY time;"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
         }
       ]
     }
+
