@@ -5,7 +5,7 @@ metadata:
 data:
   # --- Server ---
   SERVER_PORT: "8080"
-  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
   MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
 
@@ -16,7 +16,7 @@ data:
   # --- Logging ---
   LOGGING_LEVEL_PG: "info"
   LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "info"
-  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "info"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "debug"
   LOGGING_FILE_NAME: ""
   LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{app-trace-id}] %-5level %logger{36} - %msg%n"
 

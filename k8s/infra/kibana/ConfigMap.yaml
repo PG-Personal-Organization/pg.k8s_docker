@@ -7,9 +7,11 @@ data:
     #!/bin/sh
     set -e
 
-    KIBANA=http://kibana:5601
+    KIBANA=${KIBANA:-http://kibana:5601}
+    ES=${ES:-http://elasticsearch:9200}
+    TITLE=${TITLE:-k8s-logs*}
 
-    echo "⏳ Waiting for Kibana to become available..."
+    echo "⏳ Waiting for Kibana..."
     until curl -sf "$KIBANA/api/status" | grep -q '"overall":{"level":"available"'; do
       echo "Kibana not ready yet, sleeping 5s..."
       sleep 5
@@ -19,27 +21,21 @@ data:
     has_jq() { command -v jq >/dev/null 2>&1; }
 
     extract_id() {
-      if has_jq; then
-        jq -r "$1"
-      else
-        # crude but good enough for these responses
-        grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4
-      fi
+      if has_jq; then jq -r "$1"; else grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4; fi
     }
 
-    echo "🔎 Looking for existing data view..."
+    echo "🔎 Looking for existing data view '${TITLE}'..."
     FIND_RESP=$(curl -sf -H 'kbn-xsrf: true' \
-      "$KIBANA/api/saved_objects/_find?type=index-pattern&per_page=1&search_fields=title&search=k8s-logs*")
-
-    DID=$(printf "%s" "$FIND_RESP" | extract_id '.saved_objects[0].id // empty')
+      "$KIBANA/api/saved_objects/_find?type=index-pattern&per_page=100&search_fields=title&search=$(printf %s "$TITLE" | sed 's/*/%2A/g')")
+    DID=$(printf "%s" "$FIND_RESP" | extract_id '.saved_objects[] | select(.attributes.title=="'"$TITLE"'").id // empty')
 
     if [ -z "$DID" ]; then
-      echo "➕ Creating data view k8s-logs* ..."
+      echo "➕ Creating data view ${TITLE} ..."
       CREATE_RESP=$(curl -sf -X POST "$KIBANA/api/data_views/data_view" \
         -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
         -d '{
               "data_view": {
-                "title": "k8s-logs*",
+                "title": "'"$TITLE"'",
                 "name": "K8s Logs",
                 "timeFieldName": "@timestamp"
               }
@@ -50,12 +46,75 @@ data:
       echo "Found existing data view id: $DID"
     fi
 
-    echo "⚙️  Setting default index and Discover columns..."
+    echo "⚙️  Setting default index..."
+    curl -sf -X POST "$KIBANA/api/kibana/settings" \
+      -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+      -d "{
+        \"changes\": { \"defaultIndex\": \"$DID\" }
+      }" >/dev/null && echo "Default index set."
+    
+    echo "🧩 Creating/Updating runtime field kubernetes.pod_name -> kubernetes.pod.name ..."
+    curl -sf -X PUT "$KIBANA/api/data_views/data_view/$DID/runtime_field" \
+      -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+        -d "{
+      \"name\": \"kubernetes.pod_name\",
+      \"runtimeField\": {
+        \"type\": \"keyword\",
+        \"script\": { \"source\": \"if (doc.containsKey('kubernetes.pod.name') && !doc['kubernetes.pod.name'].empty) { emit(doc['kubernetes.pod.name'].value); }\" }
+      }
+      }" | sed -e 's/.*/Runtime field kubernetes.pod_name upserted./'
+
+    # ---- Resolve actual field names from Elasticsearch (ECS vs legacy) ----
+    echo "🔎 Resolving real field names from Elasticsearch (index=$TITLE)..."
+    # Ask only for candidates we care about (fast):
+    CANDIDATES='kubernetes.pod.name,kubernetes.pod_name,trace.id,traceId,log.logger,logger,log.level,level,message'
+    FCAPS=$(curl -sf "$ES/$(printf %s "$TITLE")/_field_caps?fields=$(printf %s "$CANDIDATES" | sed 's/,/%2C/g')" || true)
+
+    field_exists() {
+      # Works with or without jq
+      if [ -z "$FCAPS" ]; then return 1; fi
+      if has_jq; then
+        printf "%s" "$FCAPS" | jq -e --arg f "$1" '.fields[$f] // empty' >/dev/null 2>&1
+      else
+        printf "%s" "$FCAPS" | grep -q "\"$1\":"
+      fi
+    }
+
+    first_existing() {
+      for f in "$@"; do
+        if field_exists "$f"; then printf "%s" "$f"; return 0; fi
+      done
+      return 1
+    }
+
+    POD=$(first_existing kubernetes.pod_name kubernetes.pod.name || true)
+    TRACE=$(first_existing trace.id traceId || true)
+    LOGGER=$(first_existing log.logger logger || true)
+    LEVEL=$(first_existing log.level level || true)
+    MSG=$(first_existing message || echo "message")
+
+    # Build JSON array for defaultColumns in the desired order
+    COLS='['
+    add_col() { [ -n "$1" ] && COLS="$COLS\"$1\","; }
+    add_col "$POD"
+    add_col "$TRACE"
+    add_col "$MSG"
+    add_col "$LOGGER"
+    add_col "$LEVEL"
+    # trim trailing comma
+    COLS=$(printf "%s" "$COLS" | sed 's/,$//')
+    COLS="$COLS]"
+
+    echo "🧭 Using columns: $COLS"
+
+    echo "⚙️  Applying Kibana Advanced Settings (defaultColumns + keep columns on switch)..."
     curl -sf -X POST "$KIBANA/api/kibana/settings" \
       -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
       -d "{
         \"changes\": {
-          \"defaultIndex\": \"$DID\",
-          \"discover:columns\": [\"kubernetes.pod_name\",\"traceId\",\"message\",\"logger\",\"level\"]
+          \"defaultColumns\": $COLS,
+          \"discover:modifyColumnsOnSwitch\": false
         }
-      }" | sed -e 's/.*/Kibana settings updated./'
+      }" >/dev/null && echo "Kibana settings updated."
+
+    echo "✅ Done. Open Discover — you should see these columns by default."
