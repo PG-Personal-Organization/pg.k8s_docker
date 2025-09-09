@@ -3756,7 +3756,7 @@ data:
             {
               "format": "time_series",
               "refId": "A",
-              "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS parsing_time_ms, i.\"started_parsing_on\" AS time FROM imports i WHERE i.\"started_parsing_on\" IS NOT NULL AND i.\"ended_parsing_on\" IS NOT NULL ORDER BY time;"
+              "rawSql": "SELECT generate_series(i.\"started_parsing_on\", i.\"ended_parsing_on\", interval '1 second') AS time, i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS parsing_time_ms FROM imports i WHERE i.\"started_parsing_on\" IS NOT NULL AND i.\"ended_parsing_on\" IS NOT NULL ORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "ms" } },
@@ -3771,7 +3771,7 @@ data:
             {
               "format": "time_series",
               "refId": "B",
-              "rawSql": "SELECT i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS importing_time_ms, i.\"started_importing_on\" AS time FROM imports i WHERE i.\"started_importing_on\" IS NOT NULL AND i.\"finished_importing_on\" IS NOT NULL ORDER BY time;"
+              "rawSql": "SELECT generate_series(i.\"started_importing_on\", i.\"finished_importing_on\", interval '1 second') AS time, i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS importing_time_ms FROM imports i WHERE i.\"started_importing_on\" IS NOT NULL AND i.\"finished_importing_on\" IS NOT NULL ORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "ms" } },
@@ -3809,4 +3809,3 @@ data:
         }
       ]
     }
-
