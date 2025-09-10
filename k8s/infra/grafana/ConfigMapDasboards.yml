@@ -3738,10 +3738,7 @@ data:
       "title": "Imports Dashboard",
       "tags": ["db", "imports", "apps"],
       "uid": "imports-dashboard",
-      "time": {
-        "from": "now-5m",
-        "to": "now"
-      },
+      "time": { "from": "now-5m", "to": "now" },
       "timezone": "browser",
       "schemaVersion": 36,
       "version": 1,
@@ -3750,31 +3747,33 @@ data:
         {
           "id": 1,
           "type": "timeseries",
-          "title": "Parsing Duration (ms)",
+          "title": "Parsing Duration (ms) – timelapse",
           "datasource": { "type": "postgres", "uid": "Postgres" },
           "targets": [
             {
               "format": "time_series",
               "refId": "A",
-              "rawSql": "SELECT generate_series(i.\"started_parsing_on\", i.\"ended_parsing_on\", interval '1 second') AS time, i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS parsing_time_ms FROM imports i WHERE i.\"started_parsing_on\" IS NOT NULL AND i.\"ended_parsing_on\" IS NOT NULL ORDER BY time;"
+              "rawSql": "SELECT\n  gs AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")) * 1000 AS value\nFROM imports i\nJOIN LATERAL generate_series(i.\"started_parsing_on\", i.\"ended_parsing_on\", interval '1 second') AS gs ON TRUE\nWHERE i.\"started_parsing_on\" IS NOT NULL\n  AND i.\"ended_parsing_on\" IS NOT NULL\n  AND $__timeFilter(gs)\nORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "ms" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
           "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
         },
         {
           "id": 2,
           "type": "timeseries",
-          "title": "Importing Duration (ms)",
+          "title": "Importing Duration (ms) – timelapse",
           "datasource": { "type": "postgres", "uid": "Postgres" },
           "targets": [
             {
               "format": "time_series",
               "refId": "B",
-              "rawSql": "SELECT generate_series(i.\"started_importing_on\", i.\"finished_importing_on\", interval '1 second') AS time, i.plugin_code AS plugin, EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS importing_time_ms FROM imports i WHERE i.\"started_importing_on\" IS NOT NULL AND i.\"finished_importing_on\" IS NOT NULL ORDER BY time;"
+              "rawSql": "SELECT\n  gs AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")) * 1000 AS value\nFROM imports i\nJOIN LATERAL generate_series(i.\"started_importing_on\", i.\"finished_importing_on\", interval '1 second') AS gs ON TRUE\nWHERE i.\"started_importing_on\" IS NOT NULL\n  AND i.\"finished_importing_on\" IS NOT NULL\n  AND $__timeFilter(gs)\nORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "ms" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
           "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
         },
         {
@@ -3786,10 +3785,11 @@ data:
             {
               "format": "time_series",
               "refId": "C",
-              "rawSql": "SELECT i.plugin_code AS plugin, SUM(r.count) AS parsed_records, i.\"ended_parsing_on\" AS time FROM imports i JOIN imported_records r ON r.parent_import_id = i.id WHERE i.\"ended_parsing_on\" IS NOT NULL GROUP BY i.plugin_code, i.\"ended_parsing_on\" ORDER BY time;"
+              "rawSql": "SELECT\n  i.\"ended_parsing_on\" AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  SUM(r.count) AS value\nFROM imports i\nJOIN imported_records r ON r.parent_import_id = i.id\nWHERE i.\"ended_parsing_on\" IS NOT NULL\n  AND $__timeFilter(i.\"ended_parsing_on\")\nGROUP BY i.id, i.plugin_code, i.\"ended_parsing_on\"\nORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
           "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
         },
         {
@@ -3801,11 +3801,44 @@ data:
             {
               "format": "time_series",
               "refId": "D",
-              "rawSql": "SELECT i.plugin_code AS plugin, SUM(r.count) AS imported_records, i.\"finished_importing_on\" AS time FROM imports i JOIN imported_records r ON r.parent_import_id = i.id WHERE i.\"finished_importing_on\" IS NOT NULL GROUP BY i.plugin_code, i.\"finished_importing_on\" ORDER BY time;"
+              "rawSql": "SELECT\n  i.\"finished_importing_on\" AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  SUM(r.count) AS value\nFROM imports i\nJOIN imported_records r ON r.parent_import_id = i.id\nWHERE i.\"finished_importing_on\" IS NOT NULL\n  AND $__timeFilter(i.\"finished_importing_on\")\nGROUP BY i.id, i.plugin_code, i.\"finished_importing_on\"\nORDER BY time;"
             }
           ],
           "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
           "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "Parsed Records per second",
+          "datasource": { "type": "postgres", "uid": "Postgres" },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "E",
+              "rawSql": "SELECT\n  i.\"ended_parsing_on\" AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  SUM(r.count) / NULLIF(EXTRACT(EPOCH FROM (i.\"ended_parsing_on\" - i.\"started_parsing_on\")), 0) AS value\nFROM imports i\nJOIN imported_records r ON r.parent_import_id = i.id\nWHERE i.\"started_parsing_on\" IS NOT NULL\n  AND i.\"ended_parsing_on\" IS NOT NULL\n  AND $__timeFilter(i.\"ended_parsing_on\")\nGROUP BY i.id, i.plugin_code, i.\"started_parsing_on\", i.\"ended_parsing_on\"\nORDER BY time;"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+          "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Imported Records per second",
+          "datasource": { "type": "postgres", "uid": "Postgres" },
+          "targets": [
+            {
+              "format": "time_series",
+              "refId": "F",
+              "rawSql": "SELECT\n  i.\"finished_importing_on\" AS time,\n  CONCAT(i.plugin_code, ' #', i.id) AS metric,\n  SUM(r.count) / NULLIF(EXTRACT(EPOCH FROM (i.\"finished_importing_on\" - i.\"started_importing_on\")), 0) AS value\nFROM imports i\nJOIN imported_records r ON r.parent_import_id = i.id\nWHERE i.\"started_importing_on\" IS NOT NULL\n  AND i.\"finished_importing_on\" IS NOT NULL\n  AND $__timeFilter(i.\"finished_importing_on\")\nGROUP BY i.id, i.plugin_code, i.\"started_importing_on\", i.\"finished_importing_on\"\nORDER BY time;"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } },
+          "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+          "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
         }
       ]
     }
