@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-topics-config
+data:
+  application-k8s.yaml: |
+    pg:
+      kafka:
+        consumer-configs:
+          payments-microservice-chunk-request-processing-batch-topic:
+            concurrency: 24
+          payments-microservice-chunk-request-importing-batch-topic:
+            concurrency: 24
+          payments-microservice-chunk-response-processing-batch-topic:
+            concurrency: 24
+          payments-microservice-chunk-response-importing-batch-topic:
+            concurrency: 24
+          payments-microservice-scheduled-imports-parsing-topic:
+            concurrency: 8
+          payments-microservice-rejected-imports-parsing-topic:
+            concurrency: 8
+          payments-microservice-imports-parsing-finished-topic:
+            concurrency: 8
+          payments-microservice-scheduled-imports-importing-topic:
+            concurrency: 8
+          payments-microservice-completed-imports-importing-topic:
+            concurrency: 8
+          payments-microservice-rejected-imports-importing-topic:
+            concurrency: 8
+        topics:
+          - topic:
+              name: payments-microservice-chunk-request-processing-batch-topic
+            partitions: 48
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-chunk-request-importing-batch-topic
+            partitions: 48
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-chunk-response-processing-batch-topic
+            partitions: 96
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-chunk-response-importing-batch-topic
+            partitions: 96
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-scheduled-imports-parsing-topic
+            partitions: 32
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-rejected-imports-parsing-topic
+            partitions: 32
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-imports-parsing-finished-topic
+            partitions: 32
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-scheduled-imports-importing-topic
+            partitions: 32
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-completed-imports-importing-topic
+            partitions: 32
+            replicationFactor: 1
+          - topic:
+              name: payments-microservice-rejected-imports-importing-topic
+            partitions: 32
+            replicationFactor: 1
