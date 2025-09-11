@@ -16,17 +16,17 @@ data:
           payments-microservice-chunk-response-importing-batch-topic:
             concurrency: 12
           payments-microservice-scheduled-imports-parsing-topic:
-            concurrency: 16
+            concurrency: 8
           payments-microservice-rejected-imports-parsing-topic:
-            concurrency: 16
+            concurrency: 8
           payments-microservice-imports-parsing-finished-topic:
-            concurrency: 16
+            concurrency: 8
           payments-microservice-scheduled-imports-importing-topic:
-            concurrency: 16
+            concurrency: 8
           payments-microservice-completed-imports-importing-topic:
-            concurrency: 16
+            concurrency: 8
           payments-microservice-rejected-imports-importing-topic:
-            concurrency: 16
+            concurrency: 8
         topics:
           - topic:
               name: payments-microservice-chunk-request-processing-batch-topic
