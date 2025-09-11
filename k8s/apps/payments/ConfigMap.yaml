@@ -34,9 +34,7 @@ data:
   LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{app-trace-id}] %-5level %logger{36} - %msg%n"
 
   # --- MongoDB ---
-  MONGODB_HOST: "mongo"
-  MONGODB_PORT: "27017"
-  MONGODB_DATABASE: "payments"
+  SPRING_DATA_MONGODB_URI: "mongodb://root:example@mongo:27017/payments?authSource=admin&retryWrites=true&w=majority"
 
   # --- Remote modules (other microservices) ---
   CONTEXT_AUTH_HOST: "http://context-auth:8081"
