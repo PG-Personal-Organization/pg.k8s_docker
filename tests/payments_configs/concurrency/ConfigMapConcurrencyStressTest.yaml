@@ -8,13 +8,13 @@ data:
       kafka:
         consumer-configs:
           payments-microservice-chunk-request-processing-batch-topic:
-            concurrency: 24
+            concurrency: 12
           payments-microservice-chunk-request-importing-batch-topic:
-            concurrency: 24
+            concurrency: 12
           payments-microservice-chunk-response-processing-batch-topic:
-            concurrency: 24
+            concurrency: 12
           payments-microservice-chunk-response-importing-batch-topic:
-            concurrency: 24
+            concurrency: 12
           payments-microservice-scheduled-imports-parsing-topic:
             concurrency: 16
           payments-microservice-rejected-imports-parsing-topic:
